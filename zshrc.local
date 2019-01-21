@@ -1,0 +1,133 @@
+# Local configurations -*- mode: sh -*-
+
+# Plugins
+# antigen bundle docker
+# antigen bundle docker-compose
+# antigen bundle docker-machine
+# antigen bundle golang
+# antigen bundle python
+# antigen bundle ruby
+
+# antigen bundle archlinux
+# antigen bundle ubuntu
+
+# Theme
+if [ -n "$INSIDE_EMACS" ]; then
+    # antigen theme ys          # ys, dst, steeef, wedisagree, robbyrussell
+    DISABLE_AUTO_TITLE="true"
+    function emacs_cmdline_precmd() {
+        #PS1="%{$fg_bold[red]%}-> %{$fg_bold[magenta]%}%n%{$fg_bold[cyan]%}@%{$fg[green]%}%m %{$fg_bold[green]%}%p%{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}% %{$fg[magenta]%}%(?..%?%1v)%{$fg_bold[blue]%}? %{$fg[yellow]%}# "
+        PS1="%{$fg_bold[red]%}-> %{$fg_bold[green]%}%p%{$fg[cyan]%}%d %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}% %{$fg[magenta]%}%(?..%?%1v)%{$reset_color%}~#: "
+        #PS1="%{$fg_bold[red]%}-> %{$fg_bold[green]%}%p%{$fg[cyan]%}%d %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}% %{$reset_color%}~#: "
+        #PS1="%{$fg[green]%}%m@%{$fg[magenta]%}%(?..%?%1v)%n:%{$reset_color%}%{$fg[cyan]%}%~# "
+    }
+    function install_emacs_cmdline_precmd() {
+        for s in "${precmd_functions[@]}"; do
+            if [ "$s" = "emacs_cmdline_precmd" ]; then
+                return
+            fi
+        done
+        precmd_functions+=(emacs_cmdline_precmd)
+    }
+    install_emacs_cmdline_precmd
+else
+    # antigen theme steeef      # ys, dst, steeef, wedisagree, robbyrussell
+    # antigen theme danihodovic/steeef
+    # antigen theme seagle0128/bullet-train.zsh
+    # antigen theme simnalamburt/shellder
+    # antigen theme denysdovhan/spaceship-prompt spaceship
+
+    # go get -u github.com/justjanne/powerline-go
+    if command powerline-go >/dev/null 2>&1 && [ "$TERM" != "linux" ]; then
+        # Powerful theme (require powerline fonts)
+        function powerline_precmd() {
+            #PS1="$(powerline-go -error $? -shell zsh)"
+            PS1="$(powerline-go -error $? -shell zsh -modules nix-shell,venv,ssh,cwd,perms,git,hg,jobs,exit,root,vgo)"
+        }
+
+        function install_powerline_precmd() {
+            for s in "${precmd_functions[@]}"; do
+                if [ "$s" = "powerline_precmd" ]; then
+                    return
+                fi
+            done
+            precmd_functions+=(powerline_precmd)
+        }
+        install_powerline_precmd
+    fi
+fi
+
+# Env
+# export EDITOR=vim
+# export PYTHONPATH=/usr/local/lib/python2.7/site-packages
+
+# Aliases
+# alias upgrade_go='$DOTFILES/install_go.sh'
+
+# Proxy
+PROXY=http://127.0.0.1:1087
+PROXY2=http://127.0.0.1:8123
+SOCK_PROXY=socks5://127.0.0.1:1086
+NO_PROXY=10.*.*.*,192.168.*.*,*.local,localhost,127.0.0.1
+alias set_polipo_proxy='polipo socksParentProxy=192.168.31.1:1080 &'
+alias showproxy='echo "proxy=$http_proxy"'
+alias setproxy='export http_proxy=$PROXY; export https_proxy=$PROXY; export no_proxy=$NO_PROXY; showproxy'
+alias setproxy2='set_polipo_proxy; export http_proxy=$PROXY2; export https_proxy=$PROXY2; export no_proxy=$NO_PROXY; showproxy'
+alias unsetproxy='export http_proxy=; export https_proxy=; export no_proxy=; showproxy'
+alias toggleproxy='if [ -n "$http_proxy" ]; then unsetproxy; else setproxy; fi'
+alias toggleproxy2='if [ -n "$http_proxy" ]; then unsetproxy; else setproxy2; fi'
+alias set_sock_proxy='export http_proxy=$SOCK_PROXY; export https_proxy=$SOCK_P2ROXY; export no_proxy=$NO_PROXY; showproxy'
+alias unset_sock_proxy=unsetproxy
+alias toggle_sock_proxy='if [ -n "$http_proxy" ]; then unset_sock_proxy; else set_sock_proxy; fi'
+
+# Homebrew
+if [[ $OSTYPE == darwin* ]]; then
+    # HOMEBREW_URL=https://mirrors.ustc.edu.cn/homebrew
+
+    function set_homebrew_mirror() {
+        HOMEBREW_URL=https://mirrors.ustc.edu.cn/homebrew
+
+        export HOMEBREW_BOTTLE_DOMAIN=$HOMEBREW_URL-bottles
+
+        cd "$(brew --repo)"
+        git remote set-url origin $HOMEBREW_URL/brew.git
+        cd - >/dev/null
+
+        cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
+        git remote set-url origin $HOMEBREW_URL/homebrew-core.git
+        cd - >/dev/null
+
+        cd "$(brew --repo)/Library/Taps/homebrew/homebrew-cask"
+        git remote set-url origin $HOMEBREW_URL/homebrew-cask.git
+        cd - >/dev/null
+    }
+
+    function reset_homebrew() {
+        export HOMEBREW_BOTTLE_DOMAIN=
+
+        # reset brew.git:
+        cd "$(brew --repo)"
+        git remote set-url origin https://github.com/Homebrew/brew.git
+        # reset homebrew-core.git:
+        cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
+        git remote set-url origin https://github.com/Homebrew/homebrew-core.git
+    }
+fi
+
+# Golang
+if command -v go >/dev/null 2>&1; then
+    function goclean() {
+        go clean -i -n $1
+        go clean -i $1
+        rm -rf $GOPATH/src/$1
+        if [ -d $GOPATH/pkg/${sysOS:l}_amd64/$1 ]; then
+            rm -rf $GOPATH/pkg/${sysOS:l}_amd64/$1;
+        fi
+    }
+
+    function goclean_test() {
+        go clean -i -n $1
+        tree -L 1 $GOPATH/src/$1
+        tree -L 1 $GOPATH/pkg/${sysOS:l}_amd64/$1
+    }
+fi
