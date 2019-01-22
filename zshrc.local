@@ -13,13 +13,11 @@
 
 # Theme
 if [ -n "$INSIDE_EMACS" ]; then
-    # antigen theme ys          # ys, dst, steeef, wedisagree, robbyrussell
     DISABLE_AUTO_TITLE="true"
+    export PROMPT_COMMAND=""
+    unsetopt zle
     function emacs_cmdline_precmd() {
-        #PS1="%{$fg_bold[red]%}-> %{$fg_bold[magenta]%}%n%{$fg_bold[cyan]%}@%{$fg[green]%}%m %{$fg_bold[green]%}%p%{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}% %{$fg[magenta]%}%(?..%?%1v)%{$fg_bold[blue]%}? %{$fg[yellow]%}# "
-        PS1="%{$fg_bold[red]%}-> %{$fg_bold[green]%}%p%{$fg[cyan]%}%d %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}% %{$fg[magenta]%}%(?..%?%1v)%{$reset_color%}~#: "
-        #PS1="%{$fg_bold[red]%}-> %{$fg_bold[green]%}%p%{$fg[cyan]%}%d %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}% %{$reset_color%}~#: "
-        #PS1="%{$fg[green]%}%m@%{$fg[magenta]%}%(?..%?%1v)%n:%{$reset_color%}%{$fg[cyan]%}%~# "
+        PS1="%{$fg_bold[green]%}%p%{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}%{$fg[magenta]%}%(?..%?%1v)% %{$reset_color%} # "
     }
     function install_emacs_cmdline_precmd() {
         for s in "${precmd_functions[@]}"; do
