@@ -14,8 +14,8 @@
 # Theme
 if [ -n "$INSIDE_EMACS" ]; then
     DISABLE_AUTO_TITLE="true"
-    export PROMPT_COMMAND=""
-    unsetopt zle
+    #export PROMPT_COMMAND=""
+    #unsetopt zle
     function emacs_cmdline_precmd() {
         PS1="%{$fg_bold[green]%}%p%{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}%{$fg[magenta]%}%(?..%?%1v)% %{$reset_color%} # "
     }

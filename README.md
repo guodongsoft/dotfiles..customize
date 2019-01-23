@@ -1,1 +1,1 @@
-# dotfiles..customize
+# Centaur dotfiles customize #
