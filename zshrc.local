@@ -14,8 +14,9 @@
 # Theme
 if [ -n "$INSIDE_EMACS" ]; then
     DISABLE_AUTO_TITLE="true"
-    #export PROMPT_COMMAND=""
-    #unsetopt zle
+    # antigen theme ys            # ys, dst, steeef, wedisagree, robbyrussell
+    # export PROMPT_COMMAND=""
+    # unsetopt zle
     function emacs_cmdline_precmd() {
         PS1="%{$fg_bold[green]%}%p%{$fg[cyan]%}%~ %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%}%{$fg[magenta]%}%(?..%?%1v)% %{$reset_color%} # "
     }
@@ -35,22 +36,23 @@ else
     # antigen theme simnalamburt/shellder
     # antigen theme denysdovhan/spaceship-prompt spaceship
 
+    # Powerful theme (require powerline fonts)
     # go get -u github.com/justjanne/powerline-go
-    if command powerline-go >/dev/null 2>&1 && [ "$TERM" != "linux" ]; then
-        # Powerful theme (require powerline fonts)
-        function powerline_precmd() {
-            #PS1="$(powerline-go -error $? -shell zsh)"
-            PS1="$(powerline-go -error $? -shell zsh -modules nix-shell,venv,ssh,cwd,perms,git,hg,jobs,exit,root,vgo)"
-        }
+    function powerline_precmd() {
+        # PS1="$($GOPATH/bin/powerline-go -error $? -shell zsh)"
+        PS1="$(powerline-go -error $? -shell zsh -modules nix-shell,venv,ssh,cwd,perms,git,hg,jobs,exit,root,vgo)"
+    }
 
-        function install_powerline_precmd() {
-            for s in "${precmd_functions[@]}"; do
-                if [ "$s" = "powerline_precmd" ]; then
-                    return
-                fi
-            done
-            precmd_functions+=(powerline_precmd)
-        }
+    function install_powerline_precmd() {
+        for s in "${precmd_functions[@]}"; do
+            if [ "$s" = "powerline_precmd" ]; then
+                return
+            fi
+        done
+        precmd_functions+=(powerline_precmd)
+    }
+
+    if [ "$TERM" != "linux" ] && command powerline-go >/dev/null 2>&1; then
         install_powerline_precmd
     fi
 fi
@@ -80,23 +82,22 @@ alias toggle_sock_proxy='if [ -n "$http_proxy" ]; then unset_sock_proxy; else se
 
 # Homebrew
 if [[ $OSTYPE == darwin* ]]; then
-    # HOMEBREW_URL=https://mirrors.ustc.edu.cn/homebrew
+    HOMEBREW_URL=https://mirrors.ustc.edu.cn/homebrew
+    # export HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_URL}-bottles
 
     function set_homebrew_mirror() {
-        HOMEBREW_URL=https://mirrors.ustc.edu.cn/homebrew
-
-        export HOMEBREW_BOTTLE_DOMAIN=$HOMEBREW_URL-bottles
+        export HOMEBREW_BOTTLE_DOMAIN=${HOMEBREW_URL}-bottles
 
         cd "$(brew --repo)"
-        git remote set-url origin $HOMEBREW_URL/brew.git
+        git remote set-url origin ${HOMEBREW_URL}/brew.git
         cd - >/dev/null
 
         cd "$(brew --repo)/Library/Taps/homebrew/homebrew-core"
-        git remote set-url origin $HOMEBREW_URL/homebrew-core.git
+        git remote set-url origin ${HOMEBREW_URL}/homebrew-core.git
         cd - >/dev/null
 
         cd "$(brew --repo)/Library/Taps/homebrew/homebrew-cask"
-        git remote set-url origin $HOMEBREW_URL/homebrew-cask.git
+        git remote set-url origin ${HOMEBREW_URL}/homebrew-cask.git
         cd - >/dev/null
     }
 
